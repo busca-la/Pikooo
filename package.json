@@ -1,0 +1,13 @@
+{
+  "name": "pikooo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Un kp virtual con onda paraguaya",
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

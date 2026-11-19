@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="es-PY">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#101514" />
+  <meta name="description" content="Pikooo — un amigo virtual con onda paraguaya. Charlá a tu manera, sin vueltas." />
+  <title>Pikooo — tu kp digital 🇵🇾</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/styles.css" />
+  <script src="/app.js" type="module"></script>
+</head>
+<body>
+  <div class="background-glow" aria-hidden="true"></div>
+  <div class="app-shell">
+    <header class="site-header">
+      <a href="/" class="brand" aria-label="Pikooo, inicio"><span class="brand-symbol" aria-hidden="true">p<span class="brand-eye"></span></span><span>pikooo<span class="brand-period">.</span></span></a>
+      <div class="header-caption"><span class="header-line"></span> HECHO EN MODO PARAGUAYO <span aria-hidden="true">🇵🇾</span></div>
+      <div class="header-tag">BETA <span class="sparkle">✳</span> 01</div>
+    </header>
+
+    <main class="layout">
+      <aside class="story" aria-label="Bienvenido a Pikooo">
+        <div class="story-eyebrow"><span class="eyebrow-icon">✳</span> UN CHAT CON OTRA ONDA</div>
+        <div class="hero-copy">
+          <h1>Tenés<br>un <span class="highlight-word">kp</span><br>acá<span class="dot">.</span></h1>
+          <p>Para el chisme, las preguntas random o esos días medio bajón. Hablá nomás, a tu manera.</p>
+        </div>
+        <div class="story-bottom">
+          <div class="orbit-stamp" aria-hidden="true"><span>¿QUÉ PIO?</span><span class="orbit-star">✳</span><span>TODO BIEN</span></div>
+          <p><span class="lime-dash"></span> NO TENÉS QUE HABLAR FORMAL ACÁ.</p>
+        </div>
+      </aside>
+
+      <section class="chat-panel" aria-label="Chat con Pikooo">
+        <div class="chat-head">
+          <div class="avatar" aria-hidden="true"><span class="avatar-eye left"></span><span class="avatar-eye right"></span><span class="avatar-smile"></span></div>
+          <div class="chat-identity"><strong>pikooo<span>.</span></strong><small>Tu kp virtual <span class="identity-separator">·</span> soy una IA</small></div>
+          <button id="resetButton" class="clear-button" type="button" title="Empezar un chat nuevo" aria-label="Empezar un chat nuevo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v6h6"/></svg>
+            <span>Nuevo chat</span>
+          </button>
+        </div>
+
+        <div id="chatMessages" class="chat-messages" role="log" aria-live="polite" aria-relevant="additions" aria-label="Mensajes">
+          <div class="conversation-date">HOY, SIN VUELTAS</div>
+          <div class="message bot"><div class="message-content">E'a, apareciste 👀<br>soy Pikooo, una IA con onda de acá. ¿Qué contás?</div></div>
+        </div>
+        <div id="typingIndicator" class="typing-line" hidden aria-label="Pikooo está escribiendo"><span></span><span></span><span></span></div>
+        <div id="suggestions" class="quick-suggestions" aria-label="Para empezar">
+          <span>NO SABÉS QUÉ DECIR? PROBÁ:</span>
+          <div class="suggestion-row">
+            <button type="button" class="suggestion" data-message="e'a kp, q ondaa">e'a kp, q ondaa <span>↗</span></button>
+            <button type="button" class="suggestion" data-message="tengo un chisme JAJA">tengo un chisme 👀 <span>↗</span></button>
+            <button type="button" class="suggestion" data-message="hoy ando medio bajón">ando medio bajón <span>↗</span></button>
+          </div>
+        </div>
+        <div class="composer-area">
+          <form id="chatForm" class="composer" autocomplete="off">
+            <label class="sr-only" for="messageInput">Escribí tu mensaje</label>
+            <textarea id="messageInput" rows="1" maxlength="1200" placeholder="Escribí nomás lo que quieras..." aria-label="Escribí tu mensaje"></textarea>
+            <button id="sendButton" class="send-button" type="submit" aria-label="Enviar mensaje" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+            </button>
+          </form>
+          <div class="composer-footer"><span>ENTER PARA ENVIAR <b>↵</b></span><button id="privacyButton" type="button">PRIVACIDAD +</button></div>
+        </div>
+      </section>
+    </main>
+    <footer class="site-footer"><span>PIKOOO / PY / 2026</span><span>ES UNA IA, NO UNA PERSONA REAL. NO COMPARTAS DATOS PRIVADOS.</span></footer>
+  </div>
+  <dialog id="privacyDialog" class="privacy-dialog" aria-labelledby="privacyTitle">
+    <div class="dialog-top"><h2 id="privacyTitle">Primero tu privacidad.</h2><button id="closePrivacy" aria-label="Cerrar" type="button">✕</button></div>
+    <p>Pikooo es una IA, no una persona. Los mensajes se envían a un proveedor de inteligencia artificial para responderte; ese proveedor puede procesarlos según sus políticas. La conversación se recuerda solamente en esta pestaña durante esta sesión, y podés borrarla con «Nuevo chat».</p>
+    <p>No compartas tu dirección, teléfono, contraseñas, documentos ni datos de otras personas. Pikooo no reemplaza a familiares, amigos ni profesionales. Si sos menor, usá el servicio con autorización de tu responsable.</p>
+    <button id="privacyOk" type="button" class="dialog-accept">Entendido, kp <span>↗</span></button>
+  </dialog>
+</body>
+</html>
