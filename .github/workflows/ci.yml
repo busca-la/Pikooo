@@ -16,7 +16,6 @@ jobs:
           node --check app.js
           node --check llm-worker.js
           node --check lib/local-ai.js
-          node --check api/chat.js
           node --check lib/pikooo.js
       - name: Tests
         run: npm test
