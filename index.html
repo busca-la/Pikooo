@@ -42,6 +42,18 @@
           </button>
         </div>
 
+        <div id="localAISetup" class="local-ai-setup">
+          <div class="setup-main">
+            <span class="setup-dot" aria-hidden="true"></span>
+            <div class="setup-copy">
+              <strong id="aiSetupTitle">IA gratis en tu propio celu</strong>
+              <small id="aiSetupText">Sin cuenta ni API. Descarga inicial grande y requiere un celular compatible con WebGPU.</small>
+            </div>
+            <button id="activateAIButton" class="activate-ai" type="button">Activar IA ↗</button>
+          </div>
+          <div id="aiProgressWrap" class="load-progress" hidden role="progressbar" aria-label="Carga del modelo" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="aiProgressBar"></div></div>
+        </div>
+
         <div id="chatMessages" class="chat-messages" role="log" aria-live="polite" aria-relevant="additions" aria-label="Mensajes">
           <div class="conversation-date">HOY, SIN VUELTAS</div>
           <div class="message bot"><div class="message-content">E'a, apareciste 👀<br>soy Pikooo, una IA con onda de acá. ¿Qué contás?</div></div>
@@ -58,7 +70,7 @@
         <div class="composer-area">
           <form id="chatForm" class="composer" autocomplete="off">
             <label class="sr-only" for="messageInput">Escribí tu mensaje</label>
-            <textarea id="messageInput" rows="1" maxlength="1200" placeholder="Escribí nomás lo que quieras..." aria-label="Escribí tu mensaje"></textarea>
+            <textarea id="messageInput" rows="1" maxlength="1200" placeholder="Primero activá la IA gratis..." aria-label="Escribí tu mensaje" disabled></textarea>
             <button id="sendButton" class="send-button" type="submit" aria-label="Enviar mensaje" disabled>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
             </button>
@@ -71,8 +83,8 @@
   </div>
   <dialog id="privacyDialog" class="privacy-dialog" aria-labelledby="privacyTitle">
     <div class="dialog-top"><h2 id="privacyTitle">Primero tu privacidad.</h2><button id="closePrivacy" aria-label="Cerrar" type="button">✕</button></div>
-    <p>Pikooo es una IA, no una persona. Los mensajes se envían a un proveedor de inteligencia artificial para responderte; ese proveedor puede procesarlos según sus políticas. La conversación se recuerda solamente en esta pestaña durante esta sesión, y podés borrarla con «Nuevo chat».</p>
-    <p>No compartas tu dirección, teléfono, contraseñas, documentos ni datos de otras personas. Pikooo no reemplaza a familiares, amigos ni profesionales. Si sos menor, usá el servicio con autorización de tu responsable.</p>
+    <p>Pikooo es una IA, no una persona. Primero se descarga un modelo público al navegador desde servidores externos. Luego, tus mensajes se procesan localmente en tu dispositivo; Pikooo no los envía a una API. La charla se guarda solamente en esta pestaña durante la sesión y podés borrarla con «Nuevo chat».</p>
+    <p>No compartas tu dirección, teléfono, contraseñas, documentos ni datos de otras personas. Pikooo no reemplaza a familiares, amigos ni profesionales. El modelo local puede equivocarse o generar respuestas inapropiadas; todavía no es adecuado para uso público sin supervisión de menores. Si sos menor, pedí autorización a tu responsable.</p>
     <button id="privacyOk" type="button" class="dialog-accept">Entendido, kp <span>↗</span></button>
   </dialog>
 </body>
