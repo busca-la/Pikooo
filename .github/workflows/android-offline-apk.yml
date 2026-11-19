@@ -1,0 +1,95 @@
+name: Build Pikooo Android offline (IA incluída)
+
+on:
+  push:
+    branches: [android-offline-ia]
+    paths:
+      - 'android/**'
+      - '.github/workflows/android-offline-apk.yml'
+      - 'app.js'
+      - 'index.html'
+      - 'styles.css'
+      - 'lib/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Testar interface
+        run: |
+          node --check app.js
+          node --check llm-worker.js
+          node --check lib/local-ai.js
+          npm test
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - name: Android SDK
+        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Empacotar a interface no APK
+        run: |
+          mkdir -p android/app/src/main/assets/lib android/app/src/main/assets/models
+          cp index.html app.js styles.css favicon.svg llm-worker.js android/app/src/main/assets/
+          cp lib/*.js android/app/src/main/assets/lib/
+      - name: Baixar o Qwen2.5 GGUF oficial para DENTRO do APK
+        run: |
+          set -euo pipefail
+          MODEL="android/app/src/main/assets/models/qwen2.5-0.5b-instruct-q4_k_m.gguf"
+          URL="https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/qwen2.5-0.5b-instruct-q4_k_m.gguf?download=true"
+          curl --fail --location --retry 4 --retry-all-errors --retry-delay 5 --output "$MODEL" "$URL"
+          BYTES=$(stat -c%s "$MODEL")
+          echo "Model bytes: $BYTES"
+          test "$BYTES" -gt 450000000
+          file "$MODEL"
+          head -c 4 "$MODEL" | od -An -tx1 | grep -iq '47 47 55 46'
+          sha256sum "$MODEL"
+      - name: Compilar APK ARM64 completo
+        working-directory: android
+        run: gradle assembleDebug --no-daemon --stacktrace
+      - name: Verificar APK e arquivos embutidos
+        run: |
+          set -euo pipefail
+          APK="android/app/build/outputs/apk/debug/app-debug.apk"
+          unzip -l "$APK" | grep 'assets/models/qwen2.5-0.5b-instruct-q4_k_m.gguf'
+          unzip -l "$APK" | grep 'assets/app.js'
+          unzip -l "$APK" | grep 'lib/arm64-v8a/'
+          test $(stat -c%s "$APK") -gt 450000000
+          mkdir -p dist
+          cp "$APK" dist/Pikooo-Android-Offline.apk
+          sha256sum dist/Pikooo-Android-Offline.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Pikooo-Android-Offline-v0.2
+          path: dist/Pikooo-Android-Offline.apk
+          compression-level: 0
+          if-no-files-found: error
+      - name: Publicar APK para instalação
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="pikooo-android-v0.2.0"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/Pikooo-Android-Offline.apk --clobber
+          else
+            gh release create "$TAG" dist/Pikooo-Android-Offline.apk \
+              --target "$GITHUB_SHA" \
+              --title "Pikooo Android v0.2 — IA local incluída" \
+              --notes "APK de teste Android ARM64 com Qwen2.5 0.5B Q4_K_M embutido e inferência offline. A primeira abertura prepara o modelo localmente. Sem API paga. Pode exigir desinstalação da versão APK de teste anterior. Testes automatizados não substituem teste real em celular." \
+              --prerelease
+          fi
