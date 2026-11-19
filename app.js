@@ -17,6 +17,8 @@ const progressWrap = $('aiProgressWrap');
 const progressBar = $('aiProgressBar');
 
 const STORAGE_KEY = 'pikooo-chat-v1';
+const NATIVE = typeof window.PikoooNative !== 'undefined';
+let pendingNativeReply = null;
 const MODEL_F16 = 'Qwen2.5-0.5B-Instruct-q4f16_1-MLC';
 const MODEL_F32 = 'Qwen2.5-0.5B-Instruct-q4f32_1-MLC';
 const WEBLLM_CDN = 'https://esm.run/@mlc-ai/web-llm@0.2.89';
@@ -103,7 +105,68 @@ function updateLoadProgress(progress) {
     : 'Preparando la IA local... la primera descarga puede tardar bastante.';
 }
 
+function startNativeAI() {
+  if (loading || engine) return;
+  loading = true;
+  activateButton.disabled = true;
+  activateButton.textContent = 'Reintentar ↗';
+  setupPanel.classList.remove('error');
+  setupTitle.textContent = 'Preparando tu IA sin internet';
+  setupText.textContent = 'El modelo ya viene dentro del APK. Se prepara una sola vez.';
+  progressWrap.hidden = false;
+  progressBar.style.width = '0%';
+  updateControls();
+  try {
+    window.PikoooNative.initialize();
+  } catch {
+    loading = false;
+    setupPanel.classList.add('error');
+    setupTitle.textContent = 'Error de inicio';
+    setupText.textContent = 'No se pudo iniciar la IA integrada.';
+    activateButton.disabled = false;
+    updateControls();
+  }
+}
+
+window.pikoooNativeEvent = (event) => {
+  if (!NATIVE || !event || typeof event.type !== 'string') return;
+  if (event.type === 'copyProgress') {
+    updateLoadProgress({ progress: Number(event.percent) / 100 });
+    setupText.textContent = `Preparando la IA integrada: ${event.percent || 0}% · una sola vez`;
+  } else if (event.type === 'loading') {
+    setupText.textContent = 'Cargando el modelo en tu celular, sin conexión...';
+  } else if (event.type === 'ready') {
+    engine = { native: true };
+    loading = false;
+    setupPanel.classList.add('ready');
+    setupTitle.textContent = 'IA instalada y lista ✳';
+    setupText.textContent = 'Ya podés conversar sin internet ni pagos por mensaje.';
+    activateButton.hidden = true;
+    progressWrap.hidden = true;
+    updateControls();
+  } else if (event.type === 'error') {
+    engine = null;
+    loading = false;
+    setupPanel.classList.add('error');
+    setupTitle.textContent = 'No se pudo preparar la IA';
+    setupText.textContent = String(event.message || 'Revisá el espacio disponible e intentá de nuevo.');
+    activateButton.hidden = false;
+    activateButton.disabled = false;
+    progressWrap.hidden = true;
+    updateControls();
+  } else if (event.type === 'reply' && pendingNativeReply) {
+    const resolver = pendingNativeReply;
+    pendingNativeReply = null;
+    resolver.resolve(String(event.text || ''));
+  } else if (event.type === 'generationError' && pendingNativeReply) {
+    const resolver = pendingNativeReply;
+    pendingNativeReply = null;
+    resolver.reject(new Error(String(event.message || 'Error de inferencia local')));
+  }
+};
+
 async function activateLocalAI() {
+  if (NATIVE) { startNativeAI(); return; }
   if (loading || engine) return;
   loading = true;
   activateButton.disabled = true;
@@ -171,13 +234,21 @@ async function send(textOverride) {
       addMessage('model', protectedReply);
       return;
     }
-    const completion = await engine.chat.completions.create({
-      messages: buildLocalMessages(previous, text),
-      temperature: 0.8,
-      top_p: 0.9,
-      max_tokens: 175
-    });
-    const reply = textFromCompletion(completion);
+    let reply;
+    if (NATIVE) {
+      reply = await new Promise((resolve, reject) => {
+        pendingNativeReply = { resolve, reject };
+        window.PikoooNative.send(JSON.stringify({ text, history: previous }));
+      });
+    } else {
+      const completion = await engine.chat.completions.create({
+        messages: buildLocalMessages(previous, text),
+        temperature: 0.8,
+        top_p: 0.9,
+        max_tokens: 175
+      });
+      reply = textFromCompletion(completion);
+    }
     if (!reply) throw new Error('La IA no generó una respuesta clara. Probá reformular.');
     addMessage('model', reply);
   } catch (error) {
@@ -217,3 +288,7 @@ dialog.addEventListener('click', (event) => {
 });
 render();
 updateControls();
+if (NATIVE) {
+  document.documentElement.classList.add('pikooo-native');
+  startNativeAI();
+}
