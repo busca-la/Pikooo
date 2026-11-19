@@ -179,3 +179,11 @@ h1{font-weight:850;letter-spacing:-.105em;font-size:clamp(94px,9.5vw,175px);line
   .android-apk-button { width: 100%; min-height: 48px; }
   .android-download-actions > span { text-align: center; }
 }
+
+/* A escolha do modelo ocorre antes de iniciar o download, sem arquivos extras involuntários. */
+.model-choice{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #33443a;padding-top:11px;min-width:0}
+.model-choice label{font-size:9px;white-space:nowrap;letter-spacing:1.15px;color:#9cbaa0;font-weight:800}
+.model-choice select{min-width:0;max-width:72%;font:inherit;font-size:11px;font-weight:650;border:1px solid #4b624d;border-radius:9px;background:#111b15;color:#ecf5e8;padding:9px 25px 9px 10px}
+.model-choice select:disabled{opacity:.55}
+.local-ai-setup.ready .model-choice{display:none}
+@media(max-width:520px){.model-choice{align-items:stretch;flex-direction:column;gap:6px}.model-choice select{max-width:100%;width:100%;padding:9px}.local-ai-setup{gap:8px}}

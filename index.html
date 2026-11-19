@@ -59,9 +59,16 @@
             <span class="setup-dot" aria-hidden="true"></span>
             <div class="setup-copy">
               <strong id="aiSetupTitle">IA gratis en tu propio celu</strong>
-              <small id="aiSetupText">Sin cuenta ni API. Descarga inicial grande y requiere un celular compatible con WebGPU.</small>
+              <small id="aiSetupText">Sin cuenta ni API. Elegí el modelo según tu celular; la primera descarga necesita internet y bastante espacio.</small>
             </div>
             <button id="activateAIButton" class="activate-ai" type="button">Activar IA ↗</button>
+          </div>
+          <div class="model-choice" id="modelChoiceWrap">
+            <label for="modelQuality">CALIDAD DE LA CHARLA</label>
+            <select id="modelQuality" aria-label="Calidad del modelo de IA">
+              <option value="better">Mejor charla · 1.5B (más memoria)</option>
+              <option value="light">Modo liviano · 0.5B (menos memoria)</option>
+            </select>
           </div>
           <div id="aiProgressWrap" class="load-progress" hidden role="progressbar" aria-label="Carga del modelo" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="aiProgressBar"></div></div>
         </div>
@@ -96,7 +103,7 @@
   <dialog id="privacyDialog" class="privacy-dialog" aria-labelledby="privacyTitle">
     <div class="dialog-top"><h2 id="privacyTitle">Primero tu privacidad.</h2><button id="closePrivacy" aria-label="Cerrar" type="button">✕</button></div>
     <p>Pikooo es una IA, no una persona. Primero se descarga un modelo público al navegador desde servidores externos. Luego, tus mensajes se procesan localmente en tu dispositivo; Pikooo no los envía a una API. La charla se guarda solamente en esta pestaña durante la sesión y podés borrarla con «Nuevo chat».</p>
-    <p>No compartas tu dirección, teléfono, contraseñas, documentos ni datos de otras personas. Pikooo no reemplaza a familiares, amigos ni profesionales. El modelo local puede equivocarse o generar respuestas inapropiadas; todavía no es adecuado para uso público sin supervisión de menores. Si sos menor, pedí autorización a tu responsable.</p>
+    <p>No compartas tu dirección, teléfono, contraseñas, documentos ni datos de otras personas. Pikooo no reemplaza a familiares, amigos ni profesionales. El modelo local puede equivocarse o generar respuestas inapropiadas. Los filtros y ejemplos de estilo no garantizan respuestas seguras; todavía no es adecuado para uso público sin supervisión de menores. Si sos menor, pedí autorización a tu responsable.</p>
     <button id="privacyOk" type="button" class="dialog-accept">Entendido, kp <span>↗</span></button>
   </dialog>
 </body>

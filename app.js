@@ -1,4 +1,4 @@
-import { buildLocalMessages, safeOfflineReply, textFromCompletion } from './lib/local-ai.js';
+import { generatePikoooReply, safeOfflineReply } from './lib/local-ai.js';
 
 const $ = (id) => document.getElementById(id);
 const messagesElement = $('chatMessages');
@@ -15,10 +15,22 @@ const setupTitle = $('aiSetupTitle');
 const setupText = $('aiSetupText');
 const progressWrap = $('aiProgressWrap');
 const progressBar = $('aiProgressBar');
+const modelQuality = $('modelQuality');
 
 const STORAGE_KEY = 'pikooo-chat-v1';
-const MODEL_F16 = 'Qwen2.5-0.5B-Instruct-q4f16_1-MLC';
-const MODEL_F32 = 'Qwen2.5-0.5B-Instruct-q4f32_1-MLC';
+const MODELS = Object.freeze({
+  better: {
+    f16: 'Qwen2.5-1.5B-Instruct-q4f16_1-MLC',
+    f32: 'Qwen2.5-1.5B-Instruct-q4f32_1-MLC',
+    label: 'Mejor charla'
+  },
+  light: {
+    f16: 'Qwen2.5-0.5B-Instruct-q4f16_1-MLC',
+    f32: 'Qwen2.5-0.5B-Instruct-q4f32_1-MLC',
+    label: 'Modo liviano'
+  }
+});
+const MODEL_PREF_KEY = 'pikooo-model-choice-v2';
 const WEBLLM_CDN = 'https://esm.run/@mlc-ai/web-llm@0.2.89';
 const greeting = { role: 'model', text: "E'a, apareciste 👀\nsoy Pikooo, una IA con onda de acá. ¿Qué contás?", intro: true, time: '' };
 
@@ -28,6 +40,9 @@ let loading = false;
 let engine = null;
 let worker = null;
 let loadedModel = null;
+try {
+  if (localStorage.getItem(MODEL_PREF_KEY) === 'light') modelQuality.value = 'light';
+} catch {}
 
 function restore() {
   try {
@@ -107,6 +122,7 @@ async function activateLocalAI() {
   if (loading || engine) return;
   loading = true;
   activateButton.disabled = true;
+  modelQuality.disabled = true;
   setupPanel.classList.remove('error');
   setupTitle.textContent = 'Preparando tu IA local';
   progressWrap.hidden = false;
@@ -118,7 +134,8 @@ async function activateLocalAI() {
     if (!window.isSecureContext || !navigator.gpu) throw new Error('Tu navegador no tiene WebGPU. Probá con Chrome o Edge actualizado en un celular compatible.');
     const adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
     if (!adapter) throw new Error('No hay GPU compatible disponible. Este modo gratis necesita WebGPU.');
-    const modelId = adapter.features.has('shader-f16') ? MODEL_F16 : MODEL_F32;
+    const selected = MODELS[modelQuality.value] || MODELS.better;
+    const modelId = adapter.features.has('shader-f16') ? selected.f16 : selected.f32;
 
     const webllm = await import(WEBLLM_CDN);
     worker = new Worker(new URL('./llm-worker.js', import.meta.url), { type: 'module' });
@@ -128,8 +145,8 @@ async function activateLocalAI() {
     engine = instance;
     loadedModel = modelId;
     setupPanel.classList.add('ready');
-    setupTitle.textContent = 'Tu IA ya está funcionando ✳';
-    setupText.textContent = 'Sin API ni cobro por mensaje · las respuestas se generan en este dispositivo.';
+    setupTitle.textContent = 'IA instalada y lista ✳';
+    setupText.textContent = selected.label + ' · respuestas generadas en este dispositivo, sin API.';
     activateButton.hidden = true;
     progressWrap.hidden = true;
     input.focus({ preventScroll: true });
@@ -140,7 +157,8 @@ async function activateLocalAI() {
     if (worker) { worker.terminate(); worker = null; }
     setupPanel.classList.add('error');
     setupTitle.textContent = 'Todavía no pude activar la IA';
-    setupText.textContent = error?.message || 'Falta memoria, espacio o compatibilidad. Probá con un navegador actualizado.';
+    setupText.textContent = (error?.message || 'Falta memoria, espacio o compatibilidad.') + (modelQuality.value === 'better' ? ' También podés probar Modo liviano.' : '');
+    modelQuality.disabled = false;
     activateButton.textContent = 'Reintentar ↗';
     activateButton.disabled = false;
   } finally {
@@ -171,15 +189,8 @@ async function send(textOverride) {
       addMessage('model', protectedReply);
       return;
     }
-    const completion = await engine.chat.completions.create({
-      messages: buildLocalMessages(previous, text),
-      temperature: 0.8,
-      top_p: 0.9,
-      max_tokens: 175
-    });
-    const reply = textFromCompletion(completion);
-    if (!reply) throw new Error('La IA no generó una respuesta clara. Probá reformular.');
-    addMessage('model', reply);
+    const result = await generatePikoooReply(engine, previous, text);
+    addMessage('model', result.text);
   } catch (error) {
     console.error('Pikooo local generation:', error);
     addMessage('model', 'La IA local tuvo un problema (puede faltar memoria). Cerrá otras pestañas y probá de nuevo, kp.', { error: true });
@@ -198,6 +209,15 @@ input.addEventListener('keydown', (event) => {
   }
 });
 activateButton.addEventListener('click', activateLocalAI);
+modelQuality.addEventListener('change', () => {
+  try { localStorage.setItem(MODEL_PREF_KEY, modelQuality.value); } catch {}
+  if (engine) return;
+  setupPanel.classList.remove('error');
+  setupTitle.textContent = modelQuality.value === 'better' ? 'Mejor charla, sin API' : 'Modo liviano, sin API';
+  setupText.textContent = modelQuality.value === 'better'
+    ? 'Modelo de 1.5B: más natural, pero necesita aprox. 1.6–1.8 GB de memoria GPU. Descarga grande.'
+    : 'Modelo de 0.5B: más liviano, aprox. 1 GB de memoria GPU, pero puede responder peor.';
+});
 for (const suggestion of document.querySelectorAll('.suggestion')) {
   suggestion.addEventListener('click', () => send(suggestion.dataset.message));
 }
