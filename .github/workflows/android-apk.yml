@@ -1,0 +1,69 @@
+name: Pikooo Android APK
+
+on:
+  push:
+    branches: [android-apk]
+    paths:
+      - 'android/**'
+      - '.github/workflows/android-apk.yml'
+      - 'app.js'
+      - 'index.html'
+      - 'llm-worker.js'
+      - 'lib/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validar JavaScript
+        run: |
+          node --check app.js
+          node --check llm-worker.js
+          node --check lib/local-ai.js
+          npm test
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+      - uses: android-actions/setup-android@v3
+      - name: Instalar Android SDK
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - name: Compilar APK instalável
+        working-directory: android
+        run: gradle assembleDebug --no-daemon --stacktrace
+      - name: Preparar arquivo
+        run: |
+          mkdir -p dist
+          cp android/app/build/outputs/apk/debug/app-debug.apk dist/Pikooo-Android.apk
+          test -s dist/Pikooo-Android.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Pikooo-Android-APK
+          path: dist/Pikooo-Android.apk
+          if-no-files-found: error
+      - name: Publicar APK para download (prévia)
+        if: github.ref == 'refs/heads/android-apk'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG=pikooo-android-v0.1.0
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/Pikooo-Android.apk --clobber
+          else
+            gh release create "$TAG" dist/Pikooo-Android.apk \
+              --target "$GITHUB_SHA" \
+              --title "Pikooo Android v0.1.0 — APK de teste" \
+              --notes "APK de teste do Pikooo. Requer Android 8+, internet e WebGPU no dispositivo; modelo baixado separadamente. Não validado em aparelho real." \
+              --prerelease
+          fi
