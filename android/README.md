@@ -1,22 +1,26 @@
-# Pikooo para Android (APK de teste)
+# Pikooo Android — offline com IA embutida (v0.2)
 
-Este projeto Android abre **https://pikooo.vercel.app/** dentro de um WebView com hardware acceleration e JavaScript habilitados. Preserva o site existente, sem API paga, sem conta de usuário e sem servidor de inferência.
+Este Android APK contém a interface, Qwen2.5-0.5B-Instruct GGUF Q4_K_M e motor llama.cpp em CPU arm64. Após a instalação, o Pikooo copia o modelo dos assets do APK para armazenamento privado ao iniciar pela primeira vez e o carrega sem internet. **Não é necessário instalar modelo, WebGPU, serviços, contas, API keys, nem downloads adicionais.**
 
-**Atenção:** a IA usa WebGPU no dispositivo, que depende do Android System WebView, GPU e drivers. Se a WebView não expuser WebGPU, o app oferece abrir no navegador Chrome. A primeira ativação baixa centenas de MB de pesos do modelo e pode usar cerca de 1 GB de memória da GPU. O APK **não inclui os pesos do modelo** e **não funciona totalmente offline desde a instalação**.
+A instalação do APK é confirmada pelo Android (não há instalação silenciosa). Em versões anteriores de teste assinadas com chave debug diferente, pode ser necessário desinstalar o APK anterior antes de instalar esta versão.
 
-## Construir
+## Tamanho e requisitos
 
-Requer JDK 17, Android SDK 35 e Gradle 8.10.2.
+- APK é grande (~500 MB + runtime), devido ao modelo incluso. Reserve espaço adicional para a cópia do modelo (mínimo 600 MB livres) e memória RAM.
+- Android 8+ em **arm64-v8a**; inferência em CPU, desempenho varia conforme o dispositivo.
+- Qwen 0.5B pode cometer erros, ter limitações no jopará e produzir conteúdos inadequados: **ainda não lançar para menores sem validação de segurança e supervisão**.
+- UI e conversas locais; histórico apenas durante a sessão como no site original.
+- O site público continua com seu modo WebGPU e descarga inicial por demanda; apenas o APK v0.2 traz tudo pronto.
+- Licenças: Qwen2.5 = Apache 2.0; llama-android = MIT; llama.cpp = MIT. Consulte o código-fonte e avisos upstream.
 
-```bash
-cd android
-gradle assembleDebug
-```
+## Construir localmente
 
-Resultado: `android/app/build/outputs/apk/debug/app-debug.apk` (assinado com chave de depuração para teste/instalação manual).
+Requer JDK 17, Android SDK 35, Gradle 8.10.2.
 
-O workflow `.github/workflows/android-apk.yml` testa o JavaScript, compila o APK, publica um artefato de Actions e cria uma release *prévia* do APK para baixar.
+1. Copie `index.html`, `app.js`, `styles.css`, `favicon.svg`, `llm-worker.js` para `android/app/src/main/assets`, e `lib/*.js` para `android/app/src/main/assets/lib`.
+2. Baixe `https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/qwen2.5-0.5b-instruct-q4_k_m.gguf` para `android/app/src/main/assets/models/qwen2.5-0.5b-instruct-q4_k_m.gguf`.
+3. Rode `cd android && gradle assembleDebug`.
 
-Pacote: `py.pikooo.app` · Versão: `0.1.0` · Android 8.0+.
+Workflow GitHub Actions `.github/workflows/android-offline-apk.yml` prepara tudo e faz upload do APK verificado e release de teste.
 
-Para distribuição em loja, é necessário assinar uma versão release com chave própria e fazer testes reais de compatibilidade, desempenho e segurança com celulares Android. Não há testes reais de WebGPU realizados pelo workflow.
+Não afirmamos teste da inferência em dispositivos reais até testá-la efetivamente em um aparelho compatível.
