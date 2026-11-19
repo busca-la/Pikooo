@@ -111,3 +111,71 @@ h1{font-weight:850;letter-spacing:-.105em;font-size:clamp(94px,9.5vw,175px);line
 .load-progress>div{width:0;height:100%;background:var(--lime);border-radius:5px;transition:width .2s}
 .suggestion:disabled{opacity:.52;cursor:not-allowed;transform:none}
 @media(max-width:740px){.local-ai-setup{padding:12px 14px}.setup-main{gap:9px}.setup-copy strong{font-size:11px}.setup-copy small{font-size:9px}.activate-ai{font-size:10px;padding:10px 9px}}
+
+/* Android APK entry — visible immediately on the landing page. */
+.android-download {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  margin: 0 auto 22px;
+  padding: 20px 24px;
+  width: 100%;
+  border: 1px solid rgba(201,244,106,.25);
+  background: linear-gradient(105deg, rgba(201,244,106,.085), rgba(31,43,39,.35) 65%, rgba(201,244,106,.04));
+  border-radius: 20px;
+}
+.android-download-copy { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
+.android-download-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #c9f46a;
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1.5;
+  letter-spacing: .16em;
+}
+.apk-live-dot {
+  width: 7px;
+  height: 7px;
+  background: #c9f46a;
+  border-radius: 50%;
+  box-shadow: 0 0 9px rgba(201,244,106,.48);
+}
+.android-download-title { margin-top: 6px; color: #f5faf5; font-size: clamp(17px,2vw,24px); font-weight: 720; letter-spacing: -.035em; }
+.android-download p {
+  margin: 5px 0 0;
+  color: #aebeb4;
+  font-size: 12px;
+  line-height: 1.5;
+  max-width: 560px;
+}
+.android-download-actions { display: flex; align-items: center; flex-direction: column; flex-shrink: 0; gap: 7px; }
+.android-apk-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  white-space: nowrap;
+  background: #c9f46a;
+  color: #101514 !important;
+  padding: 13px 19px;
+  min-height: 48px;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 800;
+  border-radius: 13px;
+  transition: transform .2s ease, background .2s ease;
+}
+.android-apk-button:hover { transform: translateY(-2px); background: #d6ff83; }
+.android-apk-button span { font-size: 19px; line-height: 1; }
+.android-download-actions > span { font-size: 10px; color: #8f9d93; }
+.pikooo-native .android-download { display: none !important; }
+@media(max-width: 690px) {
+  .android-download { flex-direction: column; align-items: stretch; padding: 17px; gap: 16px; margin-bottom: 12px; border-radius: 17px; }
+  .android-download-title { font-size: 19px; }
+  .android-download-actions { align-items: stretch; width: 100%; }
+  .android-apk-button { width: 100%; min-height: 48px; }
+  .android-download-actions > span { text-align: center; }
+}
