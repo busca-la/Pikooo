@@ -75,3 +75,23 @@ test('identifica o criador sem expor dados pessoais ou presumir identidade', () 
   assert.match(PIKOOO_LOCAL_PERSONA, /Vitor Productions/);
   assert.match(PIKOOO_LOCAL_PERSONA, /No supongas que alguien es Vitor/);
 });
+
+
+test('bloqueia as duas respostas de atendente mostradas no print', () => {
+  assert.equal(isBadChatReply('Por supuesto, hola. ¿En qué puedo asistirte hoy?'), true);
+  assert.equal(isBadChatReply('¿En qué puedo asistirte hoy? ¿En qué puedo ayudarte hoy?'), true);
+  assert.equal(isBadChatReply('en que te puedo asistir'), true);
+  assert.equal(isBadChatReply('Todo tranqui por acá 😄 ¿y vos?'), false);
+});
+
+test('se a resposta de atendente persistir, usa alternativa adequada para que tal', async () => {
+  let calls = 0;
+  const engine = {chat:{completions:{create:async () => {
+    calls++;
+    return {choices:[{message:{content:'¿En qué puedo asistirte hoy?'}}]};
+  }}}};
+  const reply = await generatePikoooReply(engine, [], 'Que tal');
+  assert.equal(calls, 2);
+  assert.equal(reply.fallback, true);
+  assert.match(reply.text, /tranqui/);
+});
