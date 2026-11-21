@@ -62,3 +62,16 @@ test('apoio em crise não depende de modelo e a persona menciona IA',()=>{
   assert.equal(safeOfflineReply('hola, q haces kp'),null);
   assert.match(PIKOOO_LOCAL_PERSONA,/amigo virtual de IA/);
 });
+
+
+
+test('conserva perguntas do usuário que parecem frases genéricas', () => {
+  const messages = buildLocalMessages([{role:'user',text:'¿Qué significa en qué puedo ayudarte?'}], 'explicame');
+  assert.equal(messages.at(-2).content, '¿Qué significa en qué puedo ayudarte?');
+});
+
+test('identifica o criador sem expor dados pessoais ou presumir identidade', () => {
+  assert.match(PIKOOO_LOCAL_PERSONA, /Vitor Manoel/);
+  assert.match(PIKOOO_LOCAL_PERSONA, /Vitor Productions/);
+  assert.match(PIKOOO_LOCAL_PERSONA, /No supongas que alguien es Vitor/);
+});
